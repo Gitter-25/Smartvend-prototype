@@ -33,7 +33,7 @@ export default function Login() {
               <Icon name="machine" size={25} />
             </span>
             <h1>
-              SmartVend<span>PRESENTATION PROTOTYPE</span>
+              SmartVend
             </h1>
           </div>
           <div>
@@ -59,7 +59,7 @@ export default function Login() {
               </span>
             </div>
           </div>
-          <small>Frontend only · One machine · Two product slots</small>
+          <small> One machine · Two product slots</small>
         </section>
         <section className="login-form">
           <p className="eyebrow">DEMO ADMIN WORKSPACE</p>
@@ -99,7 +99,7 @@ export default function Login() {
             <code>{demoCredentials.email}</code>
             <code>{demoCredentials.password}</code>
           </div>
-          <p className="login-note">Demo sign-in UI only. Use fictional data throughout.</p>
+          <p className="login-note">Demo sign-in UI . Use fictional data throughout.</p>
         </section>
       </div>
     </div>
