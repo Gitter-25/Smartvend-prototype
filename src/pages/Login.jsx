@@ -32,9 +32,7 @@ export default function Login() {
             <span className="brand-icon">
               <Icon name="machine" size={25} />
             </span>
-            <h1>
-              SmartVend
-            </h1>
+            <h1>SmartVend</h1>
           </div>
           <div>
             <p className="eyebrow">CAMPUS VENDING, REIMAGINED</p>

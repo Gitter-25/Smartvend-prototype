@@ -21,7 +21,6 @@ export default function Dashboard() {
           <h3>
             Two ways to pay.
             <br />
-          
           </h3>
           <p>
             Manage student wallets, prepare product slots, and follow every simulated payment from
@@ -31,6 +30,7 @@ export default function Dashboard() {
             Open QR payment demo <Icon name="arrow" size={18} />
           </Link>
         </div>
+
         <div className="banner-visual" aria-hidden="true">
           <div className="vending-illustration">
             <div className="vending-display">
@@ -46,6 +46,7 @@ export default function Dashboard() {
           <span className="banner-caption">FRONTEND PROTOTYPE</span>
         </div>
       </section>
+
       <div className="grid metrics">
         <section className="card metric-card">
           <span className="metric-icon">
@@ -60,6 +61,7 @@ export default function Dashboard() {
             Manage inventory <Icon name="arrow" size={16} />
           </Link>
         </section>
+
         <section className="card metric-card">
           <span className="metric-icon">
             <Icon name="students" />
@@ -111,6 +113,7 @@ export default function Dashboard() {
         </div>
         {!products.length && <p>Product slots will appear once workspace data is loaded.</p>}
       </section>
+
       <section className="card">
         <div className="section-heading">
           <div>

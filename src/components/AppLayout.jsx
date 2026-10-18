@@ -76,9 +76,7 @@ export default function AppLayout() {
           </p>
         )}
         <Outlet />
-        <footer className="workspace-footer">
-          SmartVend 
-        </footer>
+        <footer className="workspace-footer">SmartVend</footer>
       </main>
     </div>
   );
