@@ -1,3 +1,8 @@
+/**
+ * Rehearsal controls: simulated online/offline status, unfinished QR orders, and a reset that
+ * restores fictional samples while retaining keys.
+ */
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../data/AppData';
@@ -6,14 +11,22 @@ import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import Icon from '../components/Icon';
 
+/**
+ * Render simulated device controls, demo-data reset, and links to unfinished QR orders.
+ */
 export default function Machine() {
   const { machine, orders, setMachine, resetDemo } = useData();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const active = orders.filter((order) =>
-    ['AwaitingPayment', 'Authorized', 'Dispensing', 'RefundPending'].includes(order.state),
+  const active = orders.filter(
+    // Keep orders that still require payment, dispensing, or refund completion.
+    (order) =>
+      ['AwaitingPayment', 'Authorized', 'Dispensing', 'RefundPending'].includes(order.state),
   );
 
+  /**
+   * Toggle the simulated device availability and report the saved result.
+   */
   async function connect() {
     setBusy(true);
     setMessage('');
@@ -27,6 +40,10 @@ export default function Machine() {
     }
   }
 
+  /**
+   * Require the reset checkbox, then restore sample records and clear the confirmation form
+   * after success.
+   */
   async function reset(event) {
     event.preventDefault();
     if (busy) {
@@ -104,16 +121,19 @@ export default function Machine() {
       <section className="card">
         <h3>Active simulated orders</h3>
         {!active.length && <p>No unfinished demo orders.</p>}
-        {active.map((order) => (
-          <div className="slot-summary" key={order.id}>
-            <div>
-              <h4>{order.productName}</h4>
-              <p className="reference">{order.id}</p>
+        {active.map(
+          // Render each unfinished order with a link back to the QR simulation.
+          (order) => (
+            <div className="slot-summary" key={order.id}>
+              <div>
+                <h4>{order.productName}</h4>
+                <p className="reference">{order.id}</p>
+              </div>
+              <StatusBadge>{order.state}</StatusBadge>
+              <Link to="/qr">Continue demo →</Link>
             </div>
-            <StatusBadge>{order.state}</StatusBadge>
-            <Link to="/qr">Continue demo →</Link>
-          </div>
-        ))}
+          ),
+        )}
       </section>
     </>
   );

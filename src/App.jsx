@@ -1,3 +1,8 @@
+/**
+ * Route map for the prototype. Pages handle forms and display; shared business rules live in
+ * lib/prototype-service.js.
+ */
+
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './data/AuthContext';
 import AppLayout from './components/AppLayout';
@@ -11,11 +16,18 @@ import Transactions from './pages/Transactions';
 import Machine from './pages/Machine';
 import Encryption from './pages/Encryption';
 
+/**
+ * Check the demo session before showing workspace pages; send signed-out users to Login. This is
+ * navigation control, not secure server authentication.
+ */
 function DemoRoute({ children }) {
   const { session } = useAuth();
   return session ? children : <Navigate to="/login" replace />;
 }
 
+/**
+ * Define which page appears for each URL and place workspace pages inside the shared layout.
+ */
 export default function App() {
   return (
     <Routes>

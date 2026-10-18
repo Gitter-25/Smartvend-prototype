@@ -1,4 +1,10 @@
-// Small local SVG icons keep the interface sharp without downloading an icon font.
+/**
+ * Local SVG icon collection; the interface does not need a downloaded icon font.
+ */
+
+/**
+ * Select a local SVG drawing by name and apply its size and other SVG properties.
+ */
 export default function Icon({ name, size = 20, ...props }) {
   const paths = {
     dashboard: (

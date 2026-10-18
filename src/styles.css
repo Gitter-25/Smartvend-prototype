@@ -1,3 +1,4 @@
+/* Theme defaults and reusable colors, borders, and corner radii used across the interface. */
 :root {
   font-family: Inter, 'Segoe UI', Arial, sans-serif;
   color: #20304a;
@@ -61,6 +62,7 @@ input,
 select {
   -webkit-tap-highlight-color: transparent;
 }
+/* Shared button appearance and interaction states, including disabled and hover feedback. */
 button {
   display: inline-flex;
   align-items: center;
@@ -137,6 +139,7 @@ select:focus-visible {
   gap: 10px;
   align-items: center;
 }
+/* Workspace shell and sidebar layout; responsive rules below adapt it for smaller screens. */
 .layout {
   display: flex;
   min-height: 100vh;
@@ -317,6 +320,7 @@ main {
   border-top: 1px solid var(--line);
   margin-top: 30px;
 }
+/* Reusable content cards shared by forms, summaries, and receipt panels. */
 .card {
   background: #fff;
   border: 1px solid var(--line);
@@ -913,6 +917,7 @@ tbody tr:hover {
 .slot-editor .slot-header .eyebrow {
   margin-bottom: 5px;
 }
+/* Presentation login layout, brand panel, and credential form. */
 .login {
   min-height: 100vh;
   display: grid;
@@ -1005,6 +1010,7 @@ tbody tr:hover {
     padding-right: 50px;
   }
 }
+/* Responsive layouts progressively reduce columns and adjust navigation for narrower screens. */
 @media (max-width: 1200px) {
   aside {
     width: 226px;
@@ -1258,6 +1264,7 @@ tbody tr:hover {
     padding: 5px 7px;
   }
 }
+/* Respect the operating system preference to reduce UI animation. */
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;
@@ -1284,6 +1291,7 @@ tbody tr:hover {
 .qr-checkout > p {
   overflow-wrap: anywhere;
 }
+/* Loading and storage-error screen shown before workspace initialization finishes. */
 .startup-state {
   min-height: 100vh;
   display: grid;
@@ -1343,6 +1351,7 @@ tbody tr:hover {
   white-space: normal;
   font-size: 12px;
 }
+/* Prototype QR checkout, order history, and simulation controls. */
 .prototype-checkout {
   text-align: center;
 }

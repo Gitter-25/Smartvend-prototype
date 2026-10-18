@@ -1,3 +1,8 @@
+/**
+ * Automated checks for real crypto helpers and simulated business rules. The in-memory adapter
+ * models service transactions; it is not a browser IndexedDB integration test.
+ */
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -19,15 +24,28 @@ import {
 } from '../src/lib/prototype-service.js';
 
 const profile = await createKeyProfile();
+/**
+ * Generate a separate request reference for a test operation.
+ */
 const reference = () => crypto.randomUUID();
 
-// A transactional in-memory adapter exercises the same browser service without a backend.
+/**
+ * Create isolated seeded records and an in-memory repository for each service test. Crypto
+ * remains real Web Crypto.
+ */
 async function fixture() {
   const repository = {
     state: await seedState(profile),
+    /**
+     * Return a deep copy so a test cannot edit saved state through its read snapshot.
+     */
     async snapshot() {
       return structuredClone(this.state);
     },
+    /**
+     * Apply a change to a draft and publish it only if the callback succeeds, modeling
+     * transaction rollback for service tests.
+     */
     async mutate(change) {
       const draft = structuredClone(this.state);
       const result = change(draft);
@@ -39,6 +57,9 @@ async function fixture() {
   return { repository, service };
 }
 
+/**
+ * Build a valid sample card purchase, with optional overrides for the scenario being tested.
+ */
 function purchase(overrides = {}) {
   return {
     studentId: demoCards[0].id,
@@ -51,14 +72,19 @@ function purchase(overrides = {}) {
 }
 
 test('UID normalization accepts reader separators and rejects malformed values', () => {
+  // Check UID formatting and rejection of malformed card identifiers.
   assert.equal(normalizeUid('04:a1-b2 c3'), '04A1B2C3');
   assert.equal(normalizeUid('04:A1:B2:C3:D4:E5:F6'), '04A1B2C3D4E5F6');
   for (const invalid of ['', 'TEST-001', '0x04A1B2C3', 'GG112233', '123', null]) {
-    assert.throws(() => normalizeUid(invalid));
+    assert.throws(
+      // Attempt the invalid UID conversion so the assertion can verify that it throws.
+      () => normalizeUid(invalid),
+    );
   }
 });
 
 test('AES-256 and private RSA keys cannot be exported', async () => {
+  // Check AES key size and that AES/private RSA key export is refused.
   assert.equal(profile.aes.algorithm.length, 256);
   assert.equal(profile.aes.extractable, false);
   assert.equal(profile.rsa.privateKey.extractable, false);
@@ -67,6 +93,7 @@ test('AES-256 and private RSA keys cannot be exported', async () => {
 });
 
 test('AES round trips and repeated encryption uses different IVs and ciphertext', async () => {
+  // Check successful AES decryption and fresh IVs for repeated encryption.
   const first = await encryptUid(profile, demoCards[0].uid, 'student');
   const second = await encryptUid(profile, demoCards[0].uid, 'student');
   assert.equal(await decryptUid(profile, first, 'student'), '04A1B2C3');
@@ -76,6 +103,7 @@ test('AES round trips and repeated encryption uses different IVs and ciphertext'
 });
 
 test('AES rejects modified ciphertext, incorrect keys, and swapped student records', async () => {
+  // Check rejection of tampering, incorrect keys, and another student's binding.
   const envelope = await encryptUid(profile, demoCards[0].uid, 'student');
   const bytes = fromBase64(envelope.ciphertext);
   bytes[0] ^= 1;
@@ -91,6 +119,7 @@ test('AES rejects modified ciphertext, incorrect keys, and swapped student recor
 });
 
 test('HMAC lookup is stable across UID formatting and depends on the secret key', async () => {
+  // Check stable HMAC matching for equivalent UIDs and different results with a different key.
   const original = await fingerprintUid(profile, '04:A1:B2:C3');
   assert.equal(await fingerprintUid(profile, '04a1b2c3'), original);
   const lookup = await crypto.subtle.generateKey(
@@ -102,6 +131,8 @@ test('HMAC lookup is stable across UID formatting and depends on the secret key'
 });
 
 test('RSA-OAEP round trips with randomized ciphertext and rejects tampering', async () => {
+  // Check the retained RSA helper's round trip, randomization, tamper rejection, and message
+  // limit.
   const first = await encryptRsa(profile, '04A1B2C3');
   assert.equal(await decryptRsa(profile, first), '04A1B2C3');
   assert.notEqual(first, await encryptRsa(profile, '04A1B2C3'));
@@ -112,6 +143,7 @@ test('RSA-OAEP round trips with randomized ciphertext and rejects tampering', as
 });
 
 test('seeded card records contain ciphertext and HMAC, not plaintext UIDs', async () => {
+  // Check that seeded records contain encrypted cards instead of storing sample UIDs as plaintext.
   const state = await seedState(profile);
   assert.equal(state.students[0].balanceCents, 10000);
   assert.equal(state.cards.length, 2);
@@ -123,6 +155,7 @@ test('seeded card records contain ciphertext and HMAC, not plaintext UIDs', asyn
 });
 
 test('registration rejects duplicates and creates zero-balance wallets', async () => {
+  // Check duplicate student rejection and new wallets starting at zero.
   const { service, repository } = await fixture();
   const added = await service.addStudent({ name: 'New Demo', number: ' demo-003 ' });
   assert.equal(added.result.balanceCents, 0);
@@ -132,6 +165,7 @@ test('registration rejects duplicates and creates zero-balance wallets', async (
 });
 
 test('enrollment encrypts a unique card and verification reports disabled status', async () => {
+  // Check encrypted enrollment, duplicate-card rejection, and disabled-card reporting.
   const { service, repository } = await fixture();
   const { result: student } = await service.addStudent({ name: 'New Demo', number: 'DEMO-003' });
   const input = { studentId: student.id, uid: '04:11:22:33' };
@@ -146,14 +180,20 @@ test('enrollment encrypts a unique card and verification reports disabled status
 });
 
 test('money validation preserves centavos and rejects extra decimals and invalid amounts', () => {
+  // Check centavo conversion and rejection of invalid or overly precise amounts.
   assert.equal(cents('15.50'), 1550);
   assert.equal(cents('0.01'), 1);
   for (const amount of ['1.001', '-1', '', NaN, Infinity, '1e2', 0]) {
-    assert.throws(() => cents(amount));
+    assert.throws(
+      // Attempt the invalid amount conversion so the assertion can verify rejection.
+      () => cents(amount),
+    );
   }
 });
 
 test('wallet credit applies once and reused references cannot change identity', async () => {
+  // Check that retrying a credit request does not add credit twice or allow different details
+  // under the same reference.
   const { service, repository } = await fixture();
   const input = { student: demoCards[0].id, amount: '10.25', request_id: reference() };
   await service.topupWallet(input);
@@ -165,6 +205,7 @@ test('wallet credit applies once and reused references cannot change identity', 
 });
 
 test('product edits preserve centavos and reject stale inventory versions', async () => {
+  // Check centavo prices and rejection of updates based on an outdated product version.
   const { service, repository } = await fixture();
   await service.saveProduct({ id: 1, name: 'Demo water', price: '25.75', stock: 5, version: 0 });
   assert.equal(repository.state.products[0].price, 25.75);
@@ -175,6 +216,7 @@ test('product edits preserve centavos and reject stale inventory versions', asyn
 });
 
 test('card purchases deduct the trusted slot price and stock only once', async () => {
+  // Check that a card request charges the saved slot price and consumes stock only once.
   const { service, repository } = await fixture();
   const input = purchase({ slot: 2 });
   const result = await service.purchaseCard(input);
@@ -187,6 +229,8 @@ test('card purchases deduct the trusted slot price and stock only once', async (
 });
 
 test('failed card dispense records a refund without consuming wallet or stock', async () => {
+  // Check that a failed card-dispense simulation records Refunded without consuming stock or
+  // wallet credit.
   const { service, repository } = await fixture();
   const result = await service.purchaseCard(purchase({ outcome: 'failure' }));
   assert.equal(result.result.status, 'Refunded');
@@ -195,12 +239,14 @@ test('failed card dispense records a refund without consuming wallet or stock', 
 });
 
 test('card mismatch, disabled cards and tampered records cannot purchase', async () => {
+  // Check that mismatched, disabled, and corrupted card records cannot make a purchase.
   const { service, repository } = await fixture();
   await assert.rejects(service.purchaseCard(purchase({ uid: demoCards[1].uid })));
   await service.toggleCard({ id: demoCards[0].id });
   await assert.rejects(service.purchaseCard(purchase()));
   await service.toggleCard({ id: demoCards[0].id });
   await repository.mutate((state) => {
+    // Corrupt the saved ciphertext to exercise the purchase integrity check.
     state.cards[0].envelope.ciphertext = 'AAAA';
   });
   await assert.rejects(service.purchaseCard(purchase()));
@@ -210,12 +256,15 @@ test('card mismatch, disabled cards and tampered records cannot purchase', async
 });
 
 test('insufficient balance and empty stock leave all purchase data unchanged', async () => {
+  // Check that insufficient credit and empty stock leave purchase data unchanged.
   const { service, repository } = await fixture();
   await repository.mutate((state) => {
+    // Set an insufficient wallet balance for the first rejection scenario.
     state.students[0].balanceCents = 1;
   });
   await assert.rejects(service.purchaseCard(purchase()));
   await repository.mutate((state) => {
+    // Restore enough credit but empty the product slot for the second rejection scenario.
     state.students[0].balanceCents = 10000;
     state.products[0].stock = 0;
   });
@@ -225,6 +274,8 @@ test('insufficient balance and empty stock leave all purchase data unchanged', a
 });
 
 test('QR reserves stock once and prevents unpaid dispensing and conflicting edits', async () => {
+  // Check QR reservation retry protection, required authorization, and blocking of conflicting
+  // purchases or edits.
   const { service, repository } = await fixture();
   const input = { slot: 1, requestId: reference() };
   await service.createOrder(input);
@@ -241,6 +292,7 @@ test('QR reserves stock once and prevents unpaid dispensing and conflicting edit
 });
 
 test('QR success completes payment and dispensing without touching student wallets', async () => {
+  // Check the successful QR state path and repeated finish without any student-wallet deduction.
   const { service, repository } = await fixture();
   const id = reference();
   await service.createOrder({ slot: 1, requestId: id });
@@ -254,6 +306,7 @@ test('QR success completes payment and dispensing without touching student walle
 });
 
 test('QR cancellation and failed payment restore stock once', async () => {
+  // Check that cancel and failed-payment actions return a reserved unit only once.
   for (const action of ['cancel', 'fail']) {
     const { service, repository } = await fixture();
     const id = reference();
@@ -266,6 +319,8 @@ test('QR cancellation and failed payment restore stock once', async () => {
 });
 
 test('failed dispense restores stock and refunds without wallet credit', async () => {
+  // Check failed dispensing, one-time stock restoration, and the simulated refund without wallet
+  // credit.
   const { service, repository } = await fixture();
   const id = reference();
   await service.createOrder({ slot: 1, requestId: id });
@@ -282,6 +337,7 @@ test('failed dispense restores stock and refunds without wallet credit', async (
 });
 
 test('invalid QR transitions roll back without changing the order', async () => {
+  // Check that out-of-order or unknown QR actions leave the order unchanged.
   const { service, repository } = await fixture();
   const id = reference();
   await service.createOrder({ slot: 1, requestId: id });
@@ -292,6 +348,8 @@ test('invalid QR transitions roll back without changing the order', async () => 
 });
 
 test('simulated device offline blocks purchases and dispense start until reconnected', async () => {
+  // Check that simulated offline status blocks card purchases and dispense start until
+  // reconnection.
   const { service, repository } = await fixture();
   await service.setMachine({ connected: false });
   await assert.rejects(service.purchaseCard(purchase()));
@@ -305,6 +363,7 @@ test('simulated device offline blocks purchases and dispense start until reconne
 });
 
 test('demo reset restores samples and keeps encryption usable with the same profile', async () => {
+  // Check that reset restores samples and that cards still verify with the retained key profile.
   const { service, repository } = await fixture();
   await service.purchaseCard(purchase());
   await service.addStudent({ name: 'Temporary', number: 'TEMP-001' });
@@ -321,6 +380,7 @@ test('demo reset restores samples and keeps encryption usable with the same prof
 });
 
 test('malformed request references are rejected before changing demo credit', async () => {
+  // Check that a malformed request reference cannot change demo wallet credit.
   const { service, repository } = await fixture();
   await assert.rejects(
     service.topupWallet({ student: demoCards[0].id, amount: 10, request_id: 'bad' }),

@@ -1,3 +1,8 @@
+/**
+ * Student management screen: compose registration, encrypted enrollment/verification, fictional
+ * wallet credit, and card enable/disable controls.
+ */
+
 import { useState } from 'react';
 import { useData } from '../data/AppData';
 import { demoCards } from '../lib/prototype-service.js';
@@ -9,11 +14,18 @@ import CardEnrollment from '../components/CardEnrollment';
 import WalletTopup from '../components/WalletTopup';
 import StatusBadge from '../components/StatusBadge';
 
+/**
+ * Render student registration, wallet credit, card enrollment, and the student list.
+ */
 export default function Students() {
   const { students, addStudent, toggleCard } = useData();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
+  /**
+   * Read and submit a student registration, then clear the form only after the service accepts
+   * it.
+   */
   async function register(event) {
     event.preventDefault();
     if (busy) {
@@ -34,6 +46,9 @@ export default function Students() {
     }
   }
 
+  /**
+   * Enable or disable the selected student's enrolled card and show feedback.
+   */
   async function changeCard(student) {
     setBusy(true);
     try {
@@ -54,11 +69,14 @@ export default function Students() {
       />
       <div className="demo-samples">
         <strong>Ready-to-use sample cards</strong>
-        {demoCards.map((card) => (
-          <span key={card.id}>
-            {card.name}: <code>{card.uid}</code>
-          </span>
-        ))}
+        {demoCards.map(
+          // Render public sample UIDs so the presenter can rehearse the card flow.
+          (card) => (
+            <span key={card.id}>
+              {card.name}: <code>{card.uid}</code>
+            </span>
+          ),
+        )}
       </div>
       <div className="two-columns">
         <section className="card">
@@ -93,27 +111,33 @@ export default function Students() {
               </tr>
             </thead>
             <tbody>
-              {students.map((student) => (
-                <tr key={student.id}>
-                  <td>{student.name}</td>
-                  <td>{student.number}</td>
-                  <td>{pesos(student.balance)}</td>
-                  <td>
-                    <StatusBadge>
-                      {!student.cardId ? 'Not enrolled' : student.active ? 'Active' : 'Disabled'}
-                    </StatusBadge>
-                  </td>
-                  <td>
-                    <Button
-                      className="secondary"
-                      disabled={busy || !student.cardId}
-                      onClick={() => changeCard(student)}
-                    >
-                      {student.active ? 'Disable' : 'Enable'} card for {student.name}
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {students.map(
+                // Render one student's wallet balance, enrollment status, and card action.
+                (student) => (
+                  <tr key={student.id}>
+                    <td>{student.name}</td>
+                    <td>{student.number}</td>
+                    <td>{pesos(student.balance)}</td>
+                    <td>
+                      <StatusBadge>
+                        {!student.cardId ? 'Not enrolled' : student.active ? 'Active' : 'Disabled'}
+                      </StatusBadge>
+                    </td>
+                    <td>
+                      <Button
+                        className="secondary"
+                        disabled={busy || !student.cardId}
+                        onClick={
+                          // Request the enable/disable action for the student in this row.
+                          () => changeCard(student)
+                        }
+                      >
+                        {student.active ? 'Disable' : 'Enable'} card for {student.name}
+                      </Button>
+                    </td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>

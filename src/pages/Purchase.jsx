@@ -1,3 +1,8 @@
+/**
+ * Card purchase screen: collect the student, UID, slot, and simulated dispense outcome. The
+ * service verifies the encrypted card and updates demo records.
+ */
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../data/AppData';
@@ -7,6 +12,9 @@ import PageHeading from '../components/PageHeading';
 import Button from '../components/Button';
 import Input from '../components/Input';
 
+/**
+ * Render encrypted-card purchase inputs and show the simulated receipt returned by the service.
+ */
 export default function Purchase() {
   const { students, products, manageCard } = useData();
   const [selected, setSelected] = useState('');
@@ -15,8 +23,16 @@ export default function Purchase() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [receipt, setReceipt] = useState(null);
-  const student = students.find((row) => row.id === selected) || students[0];
+  const student =
+    students.find(
+      // Find the selected buyer; the surrounding fallback selects the first student initially.
+      (row) => row.id === selected,
+    ) || students[0];
 
+  /**
+   * Read the typed UID and selected outcome, send one card-purchase request, and display the
+   * receipt or validation error.
+   */
   async function submit(event) {
     event.preventDefault();
     if (busy || !student) {
@@ -64,13 +80,19 @@ export default function Purchase() {
                 id="purchase-student"
                 value={student?.id || ''}
                 disabled={busy}
-                onChange={(event) => setSelected(event.target.value)}
+                onChange={
+                  // Remember the selected student for the next purchase.
+                  (event) => setSelected(event.target.value)
+                }
               >
-                {students.map((row) => (
-                  <option key={row.id} value={row.id}>
-                    {row.name}
-                  </option>
-                ))}
+                {students.map(
+                  // Render one student choice for the purchase form.
+                  (row) => (
+                    <option key={row.id} value={row.id}>
+                      {row.name}
+                    </option>
+                  ),
+                )}
               </select>
             </label>
             <p>
@@ -82,13 +104,19 @@ export default function Purchase() {
                 id="purchase-slot"
                 value={slot}
                 disabled={busy}
-                onChange={(event) => setSlot(Number(event.target.value))}
+                onChange={
+                  // Convert the selected slot value from form text to a number.
+                  (event) => setSlot(Number(event.target.value))
+                }
               >
-                {products.map((row) => (
-                  <option key={row.id} value={row.id}>
-                    Slot {row.id}: {row.name} · {pesos(row.price)} · Stock {row.stock}
-                  </option>
-                ))}
+                {products.map(
+                  // Render one product choice with its current price and stock.
+                  (row) => (
+                    <option key={row.id} value={row.id}>
+                      Slot {row.id}: {row.name} · {pesos(row.price)} · Stock {row.stock}
+                    </option>
+                  ),
+                )}
               </select>
             </label>
             <Input
@@ -107,7 +135,11 @@ export default function Purchase() {
                 id="purchase-outcome"
                 value={outcome}
                 disabled={busy}
-                onChange={(event) => setOutcome(event.target.value)}
+                onChange={
+                  // Remember whether the presentation should simulate a successful or failed
+                  // dispense.
+                  (event) => setOutcome(event.target.value)
+                }
               >
                 <option value="success">Successful dispense</option>
                 <option value="failure">Failed dispense → refund demo wallet</option>
@@ -141,11 +173,14 @@ export default function Purchase() {
           </ol>
           <div className="demo-samples">
             <strong>Sample cards</strong>
-            {demoCards.map((card) => (
-              <span key={card.id}>
-                {card.name}: <code>{card.uid}</code>
-              </span>
-            ))}
+            {demoCards.map(
+              // Render the public sample card details used during rehearsal.
+              (card) => (
+                <span key={card.id}>
+                  {card.name}: <code>{card.uid}</code>
+                </span>
+              ),
+            )}
           </div>
           <p>No physical item is dispensed. The amounts represent fictional wallet credit.</p>
         </section>

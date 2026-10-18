@@ -1,7 +1,15 @@
+/**
+ * Card security screen: display stored ciphertext and keyed lookups without exposing decrypted
+ * enrolled UIDs.
+ */
+
 import { useData } from '../data/AppData';
 import PageHeading from '../components/PageHeading';
 
-// Show enrolled-card protection without the separate encryption demo controls.
+/**
+ * Render the Card security page with saved AES ciphertext and HMAC lookups. The filename is
+ * retained for the existing route.
+ */
 export default function Encryption() {
   const { cards, students } = useData();
 
@@ -27,17 +35,27 @@ export default function Encryption() {
               </tr>
             </thead>
             <tbody>
-              {cards.map((card) => (
-                <tr key={card.id}>
-                  <td>{students.find((student) => student.id === card.studentId)?.name}</td>
-                  <td>
-                    <code className="ciphertext-cell">{card.envelope.ciphertext}</code>
-                  </td>
-                  <td>
-                    <code className="ciphertext-cell">{card.lookup}</code>
-                  </td>
-                </tr>
-              ))}
+              {cards.map(
+                // Render one encrypted card record without decrypting its UID for display.
+                (card) => (
+                  <tr key={card.id}>
+                    <td>
+                      {
+                        students.find(
+                          // Find the student name belonging to this encrypted card record.
+                          (student) => student.id === card.studentId,
+                        )?.name
+                      }
+                    </td>
+                    <td>
+                      <code className="ciphertext-cell">{card.envelope.ciphertext}</code>
+                    </td>
+                    <td>
+                      <code className="ciphertext-cell">{card.lookup}</code>
+                    </td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>

@@ -1,3 +1,8 @@
+/**
+ * Inventory screen: each fixed slot has its own form. Saved version numbers prevent an outdated
+ * form from overwriting newer stock values.
+ */
+
 import { useState } from 'react';
 import { useData } from '../data/AppData';
 import { pesos } from '../lib/format';
@@ -6,7 +11,9 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import StatusBadge from '../components/StatusBadge';
 
-// Show the two fixed vending slots using the same editor component.
+/**
+ * Render the fixed product slots with an independent editor for each one.
+ */
 export default function Product() {
   const { products } = useData();
   const [savedMessage, setSavedMessage] = useState('');
@@ -22,26 +29,41 @@ export default function Product() {
         </p>
       )}
       <div className="two-columns">
-        {products.map((product) => (
-          <SlotEditor
-            key={`${product.id}:${product.version ?? 0}`}
-            product={product}
-            onSaved={() => setSavedMessage(`Slot ${product.id} saved.`)}
-            onSaveStart={() => setSavedMessage('')}
-          />
-        ))}
+        {products.map(
+          // Create an editor for each slot; a changed version remounts it with the latest saved
+          // values.
+          (product) => (
+            <SlotEditor
+              key={`${product.id}:${product.version ?? 0}`}
+              product={product}
+              onSaved={
+                // Show which slot was successfully saved.
+                () => setSavedMessage(`Slot ${product.id} saved.`)
+              }
+              onSaveStart={
+                // Clear the previous success notice when a new save begins.
+                () => setSavedMessage('')
+              }
+            />
+          ),
+        )}
       </div>
     </>
   );
 }
 
-// Edit one slot independently so unsaved changes in the other slot stay intact.
+/**
+ * Render and manage one slot's form without mixing it with another slot's unsaved inputs.
+ */
 function SlotEditor({ product, onSaved, onSaveStart }) {
   const { saveProduct: persistProduct, loadData } = useData();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Validate price and stock before saving the product.
+  /**
+   * Validate the form, include the slot version for conflict detection, and save its name,
+   * price, and stock through shared data.
+   */
   async function saveProduct(event) {
     event.preventDefault();
     onSaveStart();
@@ -63,6 +85,8 @@ function SlotEditor({ product, onSaved, onSaveStart }) {
     }
     setBusy(true);
     try {
+      // Send the version originally shown in this form. The service rejects it if another action
+      // has changed the saved slot in the meantime.
       await persistProduct(product.id, {
         name,
         price: Math.round(price * 100) / 100,

@@ -1,3 +1,8 @@
+/**
+ * Overview screen: derive totals and summaries from saved demo records instead of using separate
+ * hard-coded counters.
+ */
+
 import { Link } from 'react-router-dom';
 import { useData } from '../data/AppData';
 import PageHeading from '../components/PageHeading';
@@ -6,10 +11,15 @@ import StatusBadge from '../components/StatusBadge';
 import Icon from '../components/Icon';
 import { pesos } from '../lib/format';
 
-// Summarize actual workspace records without implying physical hardware is connected.
+/**
+ * Render overview totals and recent activity from the current demo workspace.
+ */
 export default function Dashboard() {
   const { students, products, transactions } = useData();
   const activeCards = students.filter(
+    /**
+     * Count students who have an enrolled, enabled card.
+     */
     (student) => student.active && (student.cardId || student.card),
   ).length;
   return (
@@ -54,7 +64,11 @@ export default function Dashboard() {
           </span>
           <p className="metric-label">Available stock</p>
           <strong className="metric-value">
-            {products.reduce((total, product) => total + product.stock, 0)}
+            {products.reduce(
+              // Add each product's stock to the total number of available units.
+              (total, product) => total + product.stock,
+              0,
+            )}
           </strong>
           <p>Items across {products.length} product slots</p>
           <Link to="/product">
@@ -98,18 +112,21 @@ export default function Dashboard() {
           </Link>
         </div>
         <div className="slot-summary-grid">
-          {products.map((product) => (
-            <div className="slot-summary" key={product.id}>
-              <span className="slot-number">{String(product.id).padStart(2, '0')}</span>
-              <div>
-                <h4>{product.name}</h4>
-                <p>
-                  {pesos(product.price)} <span>·</span> {product.stock} available
-                </p>
+          {products.map(
+            // Render a product-slot summary with price, stock, and availability.
+            (product) => (
+              <div className="slot-summary" key={product.id}>
+                <span className="slot-number">{String(product.id).padStart(2, '0')}</span>
+                <div>
+                  <h4>{product.name}</h4>
+                  <p>
+                    {pesos(product.price)} <span>·</span> {product.stock} available
+                  </p>
+                </div>
+                <StatusBadge>{product.stock > 0 ? 'In stock' : 'Out of stock'}</StatusBadge>
               </div>
-              <StatusBadge>{product.stock > 0 ? 'In stock' : 'Out of stock'}</StatusBadge>
-            </div>
-          ))}
+            ),
+          )}
         </div>
         {!products.length && <p>Product slots will appear once workspace data is loaded.</p>}
       </section>

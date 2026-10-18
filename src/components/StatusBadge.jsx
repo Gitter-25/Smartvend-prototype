@@ -1,5 +1,14 @@
-// Display a short status label.
+/**
+ * Shared status presentation. Badge labels and colors do not change the stored order or receipt
+ * state.
+ */
+
+/**
+ * Convert stored status names into readable labels and choose a matching badge color.
+ */
 export default function StatusBadge({ children }) {
+  // Reversed is a legacy input label displayed as Refunded; this mapping changes presentation
+  // text, not stored transaction data.
   const label =
     { Reversed: 'Refunded', RefundPending: 'Refund pending', AwaitingPayment: 'Awaiting payment' }[
       children

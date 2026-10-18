@@ -1,3 +1,8 @@
+/**
+ * Presentation login screen using published demo credentials. Actual encryption is implemented
+ * separately for card UIDs.
+ */
+
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../data/AuthContext';
@@ -6,10 +11,17 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Icon from '../components/Icon';
 
+/**
+ * Render the fixed-credential demo login, or redirect an existing session to Overview.
+ */
 export default function Login() {
   const { session, signIn } = useAuth();
   const [message, setMessage] = useState('');
 
+  /**
+   * Read the submitted credentials, request demo sign-in, and display a validation error if it
+   * fails.
+   */
   function submit(event) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);

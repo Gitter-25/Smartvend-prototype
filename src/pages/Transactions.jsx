@@ -1,3 +1,8 @@
+/**
+ * Receipt browser: filter records locally, show ten results per page, and open the full selected
+ * receipt.
+ */
+
 import { useState } from 'react';
 import { useData } from '../data/AppData';
 import PageHeading from '../components/PageHeading';
@@ -6,6 +11,9 @@ import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import { pesos } from '../lib/format';
 
+/**
+ * Convert a receipt timestamp into a local YYYY-MM-DD date for date-filter comparisons.
+ */
 function localDate(value) {
   const date = new Date(value);
   return [
@@ -15,25 +23,42 @@ function localDate(value) {
   ].join('-');
 }
 
+/**
+ * Render filtered and paginated demo receipts and the details of a selected transaction.
+ */
 export default function Transactions() {
   const { transactions, students } = useData();
   const [filters, setFilters] = useState({ type: 'All', student: '', slot: '', date: '' });
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState('');
   const filtered = transactions.filter(
+    /**
+     * Keep only receipts matching all currently selected filters.
+     */
     (row) =>
       (filters.type === 'All' || row.type === filters.type) &&
       (!filters.student || row.studentId === filters.student) &&
       (!filters.slot || row.slot_id === Number(filters.slot)) &&
       (!filters.date || localDate(row.date) === filters.date),
   );
+  // Apply filters before pagination. Clamp the current page when fewer results remain, then select
+  // up to ten receipts for the table.
   const lastPage = Math.max(0, Math.ceil(filtered.length / 10) - 1);
   const currentPage = Math.min(page, lastPage);
   const rows = filtered.slice(currentPage * 10, (currentPage + 1) * 10);
-  const receipt = transactions.find((row) => row.id === selected);
+  const receipt = transactions.find(
+    // Find the receipt selected for the details panel.
+    (row) => row.id === selected,
+  );
 
+  /**
+   * Change one filter, return to the first page, and close any previously selected receipt.
+   */
   function change(name, value) {
-    setFilters((previous) => ({ ...previous, [name]: value }));
+    setFilters(
+      // Preserve the other filter values while replacing the changed field.
+      (previous) => ({ ...previous, [name]: value }),
+    );
     setPage(0);
     setSelected('');
   }
@@ -51,7 +76,10 @@ export default function Transactions() {
             <select
               id="filter-type"
               value={filters.type}
-              onChange={(event) => change('type', event.target.value)}
+              onChange={
+                // Apply the selected transaction-type filter.
+                (event) => change('type', event.target.value)
+              }
             >
               <option>All</option>
               <option>Top-up</option>
@@ -63,14 +91,20 @@ export default function Transactions() {
             <select
               id="filter-student"
               value={filters.student}
-              onChange={(event) => change('student', event.target.value)}
+              onChange={
+                // Apply the selected student filter.
+                (event) => change('student', event.target.value)
+              }
             >
               <option value="">All students and QR customers</option>
-              {students.map((student) => (
-                <option key={student.id} value={student.id}>
-                  {student.name}
-                </option>
-              ))}
+              {students.map(
+                // Render one student choice in the receipt filter.
+                (student) => (
+                  <option key={student.id} value={student.id}>
+                    {student.name}
+                  </option>
+                ),
+              )}
             </select>
           </label>
           <label htmlFor="filter-slot">
@@ -78,20 +112,30 @@ export default function Transactions() {
             <select
               id="filter-slot"
               value={filters.slot}
-              onChange={(event) => change('slot', event.target.value)}
+              onChange={
+                // Apply the selected slot filter.
+                (event) => change('slot', event.target.value)
+              }
             >
               <option value="">All slots and top-ups</option>
               <option value="1">Slot 1</option>
               <option value="2">Slot 2</option>
             </select>
           </label>
-          <InputDate value={filters.date} onChange={(value) => change('date', value)} />
+          <InputDate
+            value={filters.date}
+            onChange={
+              // Apply the date selected by the shared date input.
+              (value) => change('date', value)
+            }
+          />
         </div>
         <div className="section-heading">
           <p>{filtered.length} demo records</p>
           <Button
             className="secondary"
             onClick={() => {
+              // Reset every filter and return the receipt table to its initial view.
               setFilters({ type: 'All', student: '', slot: '', date: '' });
               setPage(0);
               setSelected('');
@@ -100,12 +144,21 @@ export default function Transactions() {
             Clear filters
           </Button>
         </div>
-        <TransactionTable rows={rows} onSelect={(row) => setSelected(row.id)} />
+        <TransactionTable
+          rows={rows}
+          onSelect={
+            // Open the details of the receipt clicked in the table.
+            (row) => setSelected(row.id)
+          }
+        />
         <div className="pagination">
           <Button
             className="secondary"
             disabled={currentPage === 0}
-            onClick={() => setPage(currentPage - 1)}
+            onClick={
+              // Show the preceding page of filtered receipts.
+              () => setPage(currentPage - 1)
+            }
           >
             Previous
           </Button>
@@ -115,7 +168,10 @@ export default function Transactions() {
           <Button
             className="secondary"
             disabled={currentPage >= lastPage}
-            onClick={() => setPage(currentPage + 1)}
+            onClick={
+              // Show the next page of filtered receipts.
+              () => setPage(currentPage + 1)
+            }
           >
             Next
           </Button>
@@ -125,7 +181,13 @@ export default function Transactions() {
         <section className="card receipt">
           <div className="section-heading">
             <h3>Demo transaction details</h3>
-            <Button className="secondary" onClick={() => setSelected('')}>
+            <Button
+              className="secondary"
+              onClick={
+                // Close the selected receipt details.
+                () => setSelected('')
+              }
+            >
               Close details
             </Button>
           </div>
@@ -142,6 +204,9 @@ export default function Transactions() {
   );
 }
 
+/**
+ * Render the labeled date input used by the transaction filters.
+ */
 function InputDate({ value, onChange }) {
   return (
     <label htmlFor="filter-date">
@@ -150,7 +215,10 @@ function InputDate({ value, onChange }) {
         id="filter-date"
         type="date"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={
+          // Pass the date input's text value back to its parent filter handler.
+          (event) => onChange(event.target.value)
+        }
       />
     </label>
   );

@@ -1,16 +1,32 @@
+/**
+ * Shared form for fictional wallet credit. A request reference lets the service recognize
+ * retries and avoid double credit.
+ */
+
 import { useState } from 'react';
 import { useData } from '../data/AppData';
 import { pesos } from '../lib/format';
 import Button from './Button';
 import Input from './Input';
 
+/**
+ * Render the form that adds fictional credit to a student wallet.
+ */
 export default function WalletTopup() {
   const { students, topupWallet } = useData();
   const [selected, setSelected] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const student = students.find((row) => row.id === selected) || students[0];
+  const student =
+    students.find(
+      // Find the selected wallet owner; use the first student when no selection exists.
+      (row) => row.id === selected,
+    ) || students[0];
 
+  /**
+   * Send a demo credit request with a fresh reference, then clear the form after success. No
+   * payment provider is contacted.
+   */
   async function submit(event) {
     event.preventDefault();
     if (busy || !student) {
@@ -42,13 +58,19 @@ export default function WalletTopup() {
             id="wallet-student"
             value={student?.id || ''}
             disabled={busy}
-            onChange={(event) => setSelected(event.target.value)}
+            onChange={
+              // Remember whose wallet should receive the demo credit.
+              (event) => setSelected(event.target.value)
+            }
           >
-            {students.map((row) => (
-              <option key={row.id} value={row.id}>
-                {row.name} · {row.number}
-              </option>
-            ))}
+            {students.map(
+              // Render one student choice for the wallet form.
+              (row) => (
+                <option key={row.id} value={row.id}>
+                  {row.name} · {row.number}
+                </option>
+              ),
+            )}
           </select>
         </label>
         <p>

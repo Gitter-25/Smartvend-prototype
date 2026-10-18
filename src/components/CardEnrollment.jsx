@@ -1,15 +1,31 @@
+/**
+ * Shared enrollment form used by the Students page. The clicked submit button chooses between
+ * creating an encrypted card and verifying an existing one.
+ */
+
 import { useState } from 'react';
 import { useData } from '../data/AppData';
 import Button from './Button';
 import Input from './Input';
 
+/**
+ * Render the student/card form and show feedback for enrollment or verification.
+ */
 export default function CardEnrollment() {
   const { students, manageCard } = useData();
   const [selected, setSelected] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const student = students.find((row) => row.id === selected) || students[0];
+  const student =
+    students.find(
+      // Find the selected student; the surrounding expression falls back to the first student.
+      (row) => row.id === selected,
+    ) || students[0];
 
+  /**
+   * Read the typed UID and the clicked submit button, then request enrollment or verification
+   * and display the result.
+   */
   async function submit(event) {
     event.preventDefault();
     if (busy || !student) {
@@ -17,6 +33,8 @@ export default function CardEnrollment() {
     }
     const form = event.currentTarget;
     const uid = new FormData(form).get('uid').trim();
+    // Both buttons submit this form. The button value tells the handler whether to encrypt/enroll
+    // the card or verify an existing enrollment.
     const action = event.nativeEvent.submitter?.value || 'enroll';
     setBusy(true);
     setMessage('');
@@ -46,13 +64,19 @@ export default function CardEnrollment() {
             id="card-student"
             value={student?.id || ''}
             disabled={busy}
-            onChange={(event) => setSelected(event.target.value)}
+            onChange={
+              // Remember the student chosen in the dropdown.
+              (event) => setSelected(event.target.value)
+            }
           >
-            {students.map((row) => (
-              <option key={row.id} value={row.id}>
-                {row.name} · {row.number}
-              </option>
-            ))}
+            {students.map(
+              // Render one selectable student with their name and student number.
+              (row) => (
+                <option key={row.id} value={row.id}>
+                  {row.name} · {row.number}
+                </option>
+              ),
+            )}
           </select>
         </label>
         <Input

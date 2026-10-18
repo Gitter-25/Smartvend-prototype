@@ -1,3 +1,8 @@
+/**
+ * Shared workspace shell. Sidebar links change the nested route rendered by Outlet while keeping
+ * the layout visible.
+ */
+
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../data/AuthContext';
 import { useData } from '../data/AppData';
@@ -15,6 +20,9 @@ const pages = [
   ['machine', 'Machine & demo setup', 'machine'],
 ];
 
+/**
+ * Render the sidebar, shared workspace notices, and the current route through Outlet.
+ */
 export default function AppLayout() {
   const { signOut } = useAuth();
   const { loading, error } = useData();
@@ -31,12 +39,15 @@ export default function AppLayout() {
         </div>
         <p className="nav-label">WORKSPACE</p>
         <nav aria-label="Main navigation">
-          {pages.map(([path, label, icon]) => (
-            <NavLink key={path} to={`/${path}`}>
-              <Icon name={icon} />
-              {label}
-            </NavLink>
-          ))}
+          {pages.map(
+            // Turn each navigation entry into a link with its label and icon.
+            ([path, label, icon]) => (
+              <NavLink key={path} to={`/${path}`}>
+                <Icon name={icon} />
+                {label}
+              </NavLink>
+            ),
+          )}
         </nav>
         <div className="sidebar-bottom">
           <div className="sidebar-project">

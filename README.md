@@ -80,6 +80,10 @@ The QR encodes demo metadata and should be presented as a prototype code.
 Card simulation changes fictional student credit. QR simulation leaves student
 wallets unchanged and reserves/restores demo stock.
 
+Start with the [commented code reading guide](docs/CODE_GUIDE.md) for the reading order,
+card-enrollment walkthrough, encryption terms, and simulated payment paths. Functions,
+callbacks, and important code blocks now have explanatory comments.
+
 See [presentation flow](docs/PRESENTATION.md), [file and function guide](docs/FILES.md),
 and [encryption explanation](docs/ENCRYPTION.md).
 
