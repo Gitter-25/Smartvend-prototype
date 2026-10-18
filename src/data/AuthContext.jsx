@@ -42,7 +42,13 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, signIn, signOut }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ session, signIn, signOut }}>
+      {/*
+        Render the wrapped application with access to the current demo session and sign-in/sign-
+        out actions.
+      */}
+      {children}
+    </AuthContext.Provider>
   );
 }
 

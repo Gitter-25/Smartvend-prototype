@@ -25,6 +25,23 @@ Each function has a purpose comment, including small callbacks such as `map`,
 have an opening explanation and comments beside the main logic blocks. Comments
 explain the existing behavior; they do not run as application code.
 
+## Comments inside the UI return
+
+UI sections use JSX comments in this form:
+
+```jsx
+{
+  /* Device card: display the simulated online/offline state and its controls. */
+}
+<section className="card">...</section>;
+```
+
+These comments describe sections, forms, fields, conditional panels, table groups,
+and navigation inside `return (...)`. They are for reading the source and do not
+appear as text on the page. Function comments explain how an action works; JSX
+comments explain which visible part of the interface uses that action. Small
+inline icons and text within a described section share its surrounding explanation.
+
 ## Follow one card-enrollment click
 
 1. In **Students & wallets**, `CardEnrollment.jsx` reads the selected student,

@@ -96,10 +96,19 @@ export function DataProvider({ children }) {
   if (!data) {
     return (
       <div className="startup-state" role={error ? 'alert' : 'status'}>
+        {/*
+          Before data is available, show initialization progress or a storage error instead of
+          workspace pages.
+        */}
+        {/*
+          Startup card: describe progress and expose a retry only after an initialization error.
+        */}
         <section className="card">
           <p className="eyebrow">SMARTVEND PROTOTYPE</p>
           <h2>{error ? 'Workspace could not open' : 'Preparing the presentation'}</h2>
           <p>{error || 'Creating browser encryption keys and sample records…'}</p>
+
+          {/* Allow the presenter to retry loading after a recoverable startup failure. */}
           {error && <Button onClick={loadData}>Try again</Button>}
         </section>
       </div>
@@ -154,6 +163,9 @@ export function DataProvider({ children }) {
         resetDemo: () => runAction('resetDemo'),
       }}
     >
+      {/*
+        Render the application inside the shared workspace context after initialization succeeds.
+      */}
       {children}
     </DataContext.Provider>
   );

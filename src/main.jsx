@@ -16,9 +16,13 @@ import './styles.css';
 // helps expose development lifecycle issues; initialization is shared safely.
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    {/* Use hash-based navigation so page links work with a simple static host. */}
     <HashRouter>
+      {/* Share the demo session with the whole application. */}
       <AuthProvider>
+        {/* Initialize browser keys and records, then share workspace data and actions. */}
         <DataProvider>
+          {/* Render the route map once its surrounding providers are available. */}
           <App />
         </DataProvider>
       </AuthProvider>

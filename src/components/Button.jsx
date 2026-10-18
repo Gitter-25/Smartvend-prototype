@@ -9,6 +9,10 @@
 export default function Button({ children, ...props }) {
   return (
     <button type="button" {...props}>
+      {/*
+        Shared button: forward caller properties and event handlers, then render its supplied
+        content.
+      */}
       {children}
     </button>
   );

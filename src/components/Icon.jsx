@@ -85,6 +85,10 @@ export default function Icon({ name, size = 20, ...props }) {
       aria-hidden="true"
       {...props}
     >
+      {/*
+        Render the SVG drawing for this icon name, or fall back to the machine drawing if the name
+        is unknown.
+      */}
       {paths[name] || paths.machine}
     </svg>
   );

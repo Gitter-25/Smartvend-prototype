@@ -31,7 +31,13 @@ function DemoRoute({ children }) {
 export default function App() {
   return (
     <Routes>
+      {/* The login route is available before a demo session exists. */}
       <Route path="/login" element={<Login />} />
+
+      {/*
+        Group workspace routes inside DemoRoute so the demo session is checked before AppLayout is
+        shown.
+      */}
       <Route
         element={
           <DemoRoute>
@@ -39,16 +45,35 @@ export default function App() {
           </DemoRoute>
         }
       >
+        {/* Redirect the workspace root URL to the overview page. */}
         <Route index element={<Navigate to="/dashboard" replace />} />
+
+        {/* Overview page: stock totals, student counts, product summaries, and recent receipts. */}
         <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* Students page: registration, demo wallet credit, enrollment, and card availability. */}
         <Route path="/students" element={<Students />} />
+
+        {/* Product page: edit the two fixed vending slots. */}
         <Route path="/product" element={<Product />} />
+
+        {/* Card purchase page: verify a typed UID and demonstrate a wallet purchase. */}
         <Route path="/purchase" element={<Purchase />} />
+
+        {/* QR page: create and progress simulated checkouts and refunds. */}
         <Route path="/qr" element={<QR />} />
+
+        {/* Transactions page: filter receipts, change pages, and open details. */}
         <Route path="/transactions" element={<Transactions />} />
+
+        {/* Card security page: display enrolled-card ciphertext and keyed lookup records. */}
         <Route path="/encryption" element={<Encryption />} />
+
+        {/* Machine page: simulate device availability and reset presentation data. */}
         <Route path="/machine" element={<Machine />} />
       </Route>
+
+      {/* Send unknown URLs back to the overview route. */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

@@ -49,9 +49,13 @@ export default function WalletTopup() {
 
   return (
     <section className="card">
+      {/* Reusable demo-credit card; these amounts are fictional and no money is collected. */}
       <h3>Demo wallet credit</h3>
       <p>Add fictional credit to show how a student wallet works. No money is collected.</p>
+
+      {/* Submit a credit amount for the selected student through the existing wallet handler. */}
       <form onSubmit={submit}>
+        {/* Select which student wallet receives the fictional credit. */}
         <label htmlFor="wallet-student">
           Student
           <select
@@ -73,9 +77,15 @@ export default function WalletTopup() {
             )}
           </select>
         </label>
+
+        {/* Display that student's current wallet balance before adding credit. */}
         <p>
           Demo wallet balance: <b>{pesos(student?.balance ?? 0)}</b>
         </p>
+
+        {/*
+          Collect a peso amount with centavo precision and a presentation-friendly upper limit.
+        */}
         <Input
           label="Credit amount (₱)"
           id="topup-amount"
@@ -88,10 +98,14 @@ export default function WalletTopup() {
           required
           disabled={busy}
         />
+
+        {/* Add credit once the handler validates it; prevent another click while busy. */}
         <Button type="submit" disabled={busy || !student}>
           {busy ? 'Saving…' : 'Add demo credit'}
         </Button>
       </form>
+
+      {/* Announce the amount credited or an error returned by the service. */}
       <p role="status">{message}</p>
     </section>
   );

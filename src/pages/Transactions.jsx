@@ -65,12 +65,17 @@ export default function Transactions() {
 
   return (
     <>
+      {/* Introduce the receipt history for simulated wallet and QR activity. */}
       <PageHeading
         title="Transactions"
         description="Receipts for simulated wallet and QR activity."
       />
+
+      {/* Receipt browser card: filters, result count, table, and page controls. */}
       <section className="card">
+        {/* Combine the type, student, slot, and local-date filters. */}
         <div className="filter-grid">
+          {/* Filter receipts by top-up or purchase, or show all types. */}
           <label htmlFor="filter-type">
             Type
             <select
@@ -86,6 +91,8 @@ export default function Transactions() {
               <option>Purchase</option>
             </select>
           </label>
+
+          {/* Filter by a selected student; the default also includes QR customers. */}
           <label htmlFor="filter-student">
             Student
             <select
@@ -107,6 +114,8 @@ export default function Transactions() {
               )}
             </select>
           </label>
+
+          {/* Filter purchases by vending slot, or include all slots and top-ups. */}
           <label htmlFor="filter-slot">
             Slot
             <select
@@ -122,6 +131,8 @@ export default function Transactions() {
               <option value="2">Slot 2</option>
             </select>
           </label>
+
+          {/* Reuse the date input to match the receipt's local calendar date. */}
           <InputDate
             value={filters.date}
             onChange={
@@ -130,6 +141,8 @@ export default function Transactions() {
             }
           />
         </div>
+
+        {/* Show the filtered record count and a button that clears all filters. */}
         <div className="section-heading">
           <p>{filtered.length} demo records</p>
           <Button
@@ -144,6 +157,8 @@ export default function Transactions() {
             Clear filters
           </Button>
         </div>
+
+        {/* Pass only the current page's rows and open details when a receipt is selected. */}
         <TransactionTable
           rows={rows}
           onSelect={
@@ -151,6 +166,11 @@ export default function Transactions() {
             (row) => setSelected(row.id)
           }
         />
+
+        {/*
+          Move through groups of ten filtered receipts; disable controls at the first or last
+          page.
+        */}
         <div className="pagination">
           <Button
             className="secondary"
@@ -177,8 +197,15 @@ export default function Transactions() {
           </Button>
         </div>
       </section>
+
+      {/* Render the detail panel only when a receipt is selected. */}
       {receipt && (
         <section className="card receipt">
+          {/*
+            Selected receipt panel: expose the full reference, amount, status, and explanatory
+            note.
+          */}
+          {/* Pair the receipt title with the control that closes its detail panel. */}
           <div className="section-heading">
             <h3>Demo transaction details</h3>
             <Button
@@ -191,10 +218,14 @@ export default function Transactions() {
               Close details
             </Button>
           </div>
+
+          {/* Display the full reference rather than the table's shortened version. */}
           <p className="reference">{receipt.id}</p>
           <p>
             {receipt.student} · {receipt.type} · {pesos(receipt.amount)}
           </p>
+
+          {/* Display the saved receipt status using the shared label and color mapping. */}
           <StatusBadge>{receipt.status}</StatusBadge>
           <p>{receipt.note}</p>
           <p>No real payment was processed.</p>
@@ -211,6 +242,7 @@ function InputDate({ value, onChange }) {
   return (
     <label htmlFor="filter-date">
       Date
+      {/* Send the date value back to the parent filter handler when the user changes it. */}
       <input
         id="filter-date"
         type="date"

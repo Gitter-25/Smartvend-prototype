@@ -19,15 +19,22 @@ export default function Product() {
   const [savedMessage, setSavedMessage] = useState('');
   return (
     <>
+      {/* Introduce the two fixed vending-slot editors. */}
       <PageHeading
         title="Product slots"
         description="Edit demo products, prices, and stock in two fixed slots."
       />
+
+      {/* Show a save confirmation only after an editor has reported a successful update. */}
       {savedMessage && (
         <p className="form-message" role="status">
           {savedMessage}
         </p>
       )}
+
+      {/*
+        Render an independent editor per slot; its version key reloads inputs after saved changes.
+      */}
       <div className="two-columns">
         {products.map(
           // Create an editor for each slot; a changed version remounts it with the latest saved
@@ -103,17 +110,27 @@ function SlotEditor({ product, onSaved, onSaveStart }) {
 
   return (
     <section className="card slot-editor">
+      {/*
+        Single-slot editor card; its local form state is separate from the other slot's inputs.
+      */}
+      {/* Display the slot number, saved product name, and current stock badge. */}
       <div className="slot-header">
+        {/* Group the fixed slot number and saved product name within the card header. */}
         <div>
           <p className="eyebrow">SLOT {String(product.id).padStart(2, '0')}</p>
           <h3>{product.name}</h3>
         </div>
         <StatusBadge>{product.stock ? 'In stock' : 'Out of stock'}</StatusBadge>
       </div>
+
+      {/* Summarize the saved price and stock before the editable form. */}
       <p>
         {pesos(product.price)} · {product.stock} items available
       </p>
+
+      {/* Submit a validated product update with the saved version for conflict detection. */}
       <form onSubmit={saveProduct}>
+        {/* Edit the product name while retaining the current saved value as its initial value. */}
         <Input
           label="Product name"
           id={`product-name-${product.id}`}
@@ -122,7 +139,10 @@ function SlotEditor({ product, onSaved, onSaveStart }) {
           required
           maxLength={80}
         />
+
+        {/* Place price and whole-unit stock fields together. */}
         <div className="form-grid">
+          {/* Accept peso prices with centavo precision; the service validates the final amount. */}
           <Input
             label="Price (₱)"
             id={`price-${product.id}`}
@@ -133,6 +153,8 @@ function SlotEditor({ product, onSaved, onSaveStart }) {
             step="0.01"
             required
           />
+
+          {/* Accept a non-negative whole stock count. */}
           <Input
             label="Stock count"
             id={`stock-${product.id}`}
@@ -144,11 +166,17 @@ function SlotEditor({ product, onSaved, onSaveStart }) {
             required
           />
         </div>
+
+        {/* Save this slot and prevent another submission while it is busy. */}
         <Button type="submit" disabled={busy}>
           {busy ? 'Saving…' : `Save Slot ${product.id}`}
         </Button>
       </form>
+
+      {/* Display validation errors or save feedback for this editor only. */}
       <p role="status">{message}</p>
+
+      {/* Reload the latest shared records after a conflict before retrying an edit. */}
       <Button className="text-button" type="button" disabled={busy} onClick={loadData}>
         Reload latest values
       </Button>

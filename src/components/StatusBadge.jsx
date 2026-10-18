@@ -24,6 +24,10 @@ export default function StatusBadge({ children }) {
           : 'neutral';
   return (
     <span className={`badge badge-${tone}`}>
+      {/*
+        Pair a decorative dot with the readable status label; the surrounding class supplies its
+        color.
+      */}
       <span className="status-dot" />
       {label}
     </span>

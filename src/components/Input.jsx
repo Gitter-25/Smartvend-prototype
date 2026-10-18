@@ -10,6 +10,11 @@ export default function Input({ label, id, ...props }) {
   return (
     <label htmlFor={id}>
       {label}
+
+      {/*
+        Link this field to the label through id; forward its type, validation, value, and event
+        properties.
+      */}
       <input id={id} {...props} />
     </label>
   );

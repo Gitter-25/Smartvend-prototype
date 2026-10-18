@@ -55,9 +55,16 @@ export default function CardEnrollment() {
 
   return (
     <section className="card">
+      {/* Reusable encrypted-card form, embedded in the Students page. */}
       <h3>Encrypted card enrollment</h3>
       <p>Enter a fictional hexadecimal UID. The prototype stores its ciphertext and keyed hash.</p>
+
+      {/*
+        Use one submit handler for both buttons; each button value chooses enrollment or
+        verification.
+      */}
       <form onSubmit={submit}>
+        {/* Select the student to enroll or verify and display their identifying details. */}
         <label htmlFor="card-student">
           Student
           <select
@@ -79,6 +86,11 @@ export default function CardEnrollment() {
             )}
           </select>
         </label>
+
+        {/*
+          Collect a fictional hexadecimal UID; the service validates and normalizes it before
+          cryptography.
+        */}
         <Input
           label="Card UID (hexadecimal)"
           id="enrollment-uid"
@@ -89,7 +101,15 @@ export default function CardEnrollment() {
           autoComplete="off"
           disabled={busy}
         />
+
+        {/*
+          Group enrollment and verification; enable each action only when the student's enrollment
+          permits it.
+        */}
         <div className="actions">
+          {/*
+            Create an encrypted card only for a student who does not already have an enrollment.
+          */}
           <Button
             type="submit"
             name="action"
@@ -98,6 +118,8 @@ export default function CardEnrollment() {
           >
             Encrypt & enroll card
           </Button>
+
+          {/* Verify an existing enrollment; the result also reports whether its card is active. */}
           <Button
             type="submit"
             name="action"
@@ -109,6 +131,8 @@ export default function CardEnrollment() {
           </Button>
         </div>
       </form>
+
+      {/* Announce enrollment or verification results and readable error messages. */}
       <p role="status">{message}</p>
     </section>
   );

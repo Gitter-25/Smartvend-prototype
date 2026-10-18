@@ -66,14 +66,21 @@ export default function Purchase() {
 
   return (
     <>
+      {/* Explain that this page verifies encrypted cards and simulates wallet purchases. */}
       <PageHeading
         title="Card purchase"
         description="Verify an encrypted card, then simulate the wallet and dispensing flow."
       />
+
+      {/* Pair the working purchase form with the presentation explanation. */}
       <div className="two-columns">
+        {/* Purchase card: collect the student, product, UID, and chosen dispense outcome. */}
         <section className="card">
           <h3>Simulate a student purchase</h3>
+
+          {/* Submit all purchase inputs to the existing card verification and purchase handler. */}
           <form onSubmit={submit}>
+            {/* Select the enrolled student whose fictional wallet will be checked. */}
             <label htmlFor="purchase-student">
               Student
               <select
@@ -95,9 +102,13 @@ export default function Purchase() {
                 )}
               </select>
             </label>
+
+            {/* Display the selected student's current demo balance without changing it. */}
             <p>
               Demo wallet: <b>{pesos(student?.balance ?? 0)}</b>
             </p>
+
+            {/* Select a product using its saved slot ID; display its current price and stock. */}
             <label htmlFor="purchase-slot">
               Product slot
               <select
@@ -119,6 +130,11 @@ export default function Purchase() {
                 )}
               </select>
             </label>
+
+            {/*
+              Collect the UID to verify; disabling autocomplete avoids suggesting previously
+              entered identifiers.
+            */}
             <Input
               label="Enrolled card UID"
               id="purchase-uid"
@@ -129,6 +145,8 @@ export default function Purchase() {
               autoComplete="off"
               disabled={busy}
             />
+
+            {/* Choose the successful or failed dispensing scenario for the presentation. */}
             <label htmlFor="purchase-outcome">
               Dispense simulation
               <select
@@ -145,13 +163,26 @@ export default function Purchase() {
                 <option value="failure">Failed dispense → refund demo wallet</option>
               </select>
             </label>
+
+            {/*
+              Start verification and show progress; the service enforces wallet, card, and stock
+              rules.
+            */}
             <Button type="submit" disabled={busy || !student}>
               {busy ? 'Verifying card…' : 'Simulate card purchase'}
             </Button>
           </form>
+
+          {/* Announce the purchase result or validation error. */}
           <p role="status">{message}</p>
+
+          {/* Show the returned receipt only after a simulated purchase produces one. */}
           {receipt && (
             <div className="demo-receipt">
+              {/*
+                Summarize the result, charged/displayed amount, product, and reference with a
+                history link.
+              */}
               <strong>{receipt.status}</strong>
               <p>
                 {pesos(receipt.amountCents / 100)} · {receipt.product_name}
@@ -161,9 +192,17 @@ export default function Purchase() {
             </div>
           )}
         </section>
+
+        {/*
+          Presentation guide: explain how the card is verified before fictional wallet changes.
+        */}
         <section className="card">
           <p className="eyebrow">PRESENTATION GUIDE</p>
           <h3>What happens during this demo?</h3>
+
+          {/*
+            List the normalization, keyed lookup, AES verification, and purchase checks in order.
+          */}
           <ol className="demo-steps">
             <li>Normalize the typed card UID.</li>
             <li>Find its enrolled record using HMAC-SHA-256.</li>
@@ -171,6 +210,8 @@ export default function Purchase() {
             <li>Check card status, demo wallet credit, and available stock.</li>
             <li>Record the simulated purchase or refund.</li>
           </ol>
+
+          {/* Provide public sample identifiers for demonstrating the purchase form. */}
           <div className="demo-samples">
             <strong>Sample cards</strong>
             {demoCards.map(

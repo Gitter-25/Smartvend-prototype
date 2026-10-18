@@ -122,15 +122,22 @@ export default function QR() {
 
   return (
     <>
+      {/* Introduce the local QR simulation and make its no-payment-API scope visible. */}
       <PageHeading
         title="QR payment demo"
         description="A payment interface with simulated outcomes. No payment API is called."
       />
+
+      {/* Place checkout creation beside the currently selected order. */}
       <div className="two-columns">
+        {/* Checkout creation card: select a slot and reserve a unit for a simulated order. */}
         <section className="card">
           <p className="eyebrow">CHECKOUT PROTOTYPE</p>
           <h3>Create a demo checkout</h3>
+
+          {/* Submit a new checkout request; an unfinished order blocks another checkout. */}
           <form onSubmit={create}>
+            {/* Choose a saved product slot and show its current price and stock. */}
             <label htmlFor="qr-slot">
               Product slot
               <select
@@ -153,10 +160,17 @@ export default function QR() {
                 )}
               </select>
             </label>
+
+            {/*
+              Create the demo order and QR; disable creation while busy or while another order is
+              unfinished.
+            */}
             <Button type="submit" disabled={busy || !!activeOrder}>
               Generate demo QR
             </Button>
           </form>
+
+          {/* Show a resume link when an unfinished order prevents starting a new checkout. */}
           {activeOrder && (
             <p className="helper-text">
               Finish or cancel the active demo order first.{' '}
@@ -173,19 +187,33 @@ export default function QR() {
               </button>
             </p>
           )}
+
+          {/* Announce checkout creation, transition results, or errors. */}
           <p role="status">{message}</p>
+
+          {/* Explain that scanning this QR reads demo metadata and does not collect a payment. */}
           <div className="scope-note">
             This QR contains demo order information, not a payment link. Use the on-screen controls
             to demonstrate payment. No PayMongo account or credentials are required.
           </div>
         </section>
+
+        {/* Selected checkout card: show order details and controls, or a helpful empty state. */}
         <section className="card prototype-checkout">
+          {/*
+            Switch between the selected order's checkout interface and the no-order placeholder.
+          */}
           {order ? (
             <>
+              {/* Show the checkout heading and the saved order state. */}
               <div className="section-heading">
                 <h3>Demo checkout</h3>
                 <StatusBadge>{order.state}</StatusBadge>
               </div>
+
+              {/*
+                Display the generated image when ready, otherwise show QR preparation feedback.
+              */}
               <div className="prototype-qr">
                 {code ? (
                   <img
@@ -198,13 +226,30 @@ export default function QR() {
                   <p>Preparing QR…</p>
                 )}
               </div>
+
+              {/* Format the selected order's amount as Philippine pesos. */}
               <strong className="checkout-total">{pesos(order.amount)}</strong>
+
+              {/* Identify the product and slot reserved by this order. */}
               <p>
                 {order.productName} · Slot {order.slot}
               </p>
+
+              {/*
+                Keep the full order reference available for matching checkout and history records.
+              */}
               <p className="reference">{order.id}</p>
-              <p>{explanations[order.state]}</p>
+              <p>
+                {/* Explain what the selected order's current state means to the presenter. */}
+                {explanations[order.state]}
+              </p>
+
+              {/* Offer only simulation actions appropriate to the order's current state. */}
               <div className="actions simulation-actions">
+                {/*
+                  Before authorization, demonstrate payment success, payment failure, or
+                  cancellation.
+                */}
                 {order.state === 'AwaitingPayment' && (
                   <>
                     <Button
@@ -238,6 +283,8 @@ export default function QR() {
                     </Button>
                   </>
                 )}
+
+                {/* After authorization, allow the simulated device to begin dispensing. */}
                 {order.state === 'Authorized' && (
                   <Button
                     disabled={busy}
@@ -249,6 +296,10 @@ export default function QR() {
                     Start dispense simulation
                   </Button>
                 )}
+
+                {/*
+                  During dispensing, choose whether the simulated product was delivered or failed.
+                */}
                 {order.state === 'Dispensing' && (
                   <>
                     <Button
@@ -273,6 +324,8 @@ export default function QR() {
                     </Button>
                   </>
                 )}
+
+                {/* After a failed dispense, finish the local refund demonstration. */}
                 {order.state === 'RefundPending' && (
                   <Button
                     disabled={busy}
@@ -289,6 +342,7 @@ export default function QR() {
             </>
           ) : (
             <div className="empty-state">
+              {/* Prompt the presenter to create an order when there is no checkout to display. */}
               <Icon name="qr" size={40} />
               <h4>Your demo QR will appear here</h4>
               <p>Select a product and generate a demo checkout.</p>
@@ -296,9 +350,15 @@ export default function QR() {
           )}
         </section>
       </div>
+
+      {/* Order history: keep previous demo checkouts selectable for reviewing their states. */}
       <section className="card">
         <h3>Demo QR orders</h3>
+
+        {/* Explain the empty history before the first demo checkout has been created. */}
         {!orders.length && <p>No demo checkouts yet.</p>}
+
+        {/* Render a history button for each saved QR order. */}
         <div className="demo-order-list">
           {orders.map(
             // Render one saved QR order as a selectable history entry.
@@ -314,6 +374,10 @@ export default function QR() {
                 }
                 aria-pressed={order?.id === row.id}
               >
+                {/*
+                  Show one history entry; aria-pressed marks the order whose checkout is currently
+                  open.
+                */}
                 <span>
                   <strong>
                     {row.productName} · {pesos(row.amount)}
